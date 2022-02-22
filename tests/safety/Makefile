@@ -1,5 +1,5 @@
 CC = clang
-CCFLAGS = -O3 -fPIC -DPANDA -I.
+CCFLAGS = -O3 -fPIC -DSTM32F4 -DSTM32F413xx -I.
 
 .PHONY: all
 all: libpandasafety.so
@@ -9,7 +9,7 @@ libpandasafety.so: test.o
 
 test.o: test.c
 	@echo "[ CC ] $@"
-	$(CC) $(CCFLAGS) -MMD -c -I../../board -o '$@' '$<'
+	$(CC) $(CCFLAGS)  -nostartfiles -MMD -c -I../../board -I../../board/inc -o '$@' '$<'
 
 .PHONY: clean
 clean:
