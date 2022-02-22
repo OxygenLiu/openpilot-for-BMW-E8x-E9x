@@ -11,7 +11,7 @@ from tools.lib.logreader import LogReader
 
 if __name__ == "__main__":
 
-  no_upload = "--no-upload" in sys.argv
+  no_upload = True
 
   process_replay_dir = os.path.dirname(os.path.abspath(__file__))
   ref_commit_fn = os.path.join(process_replay_dir, "ref_commit")
@@ -20,7 +20,7 @@ if __name__ == "__main__":
   with open(ref_commit_fn, "w") as f:
     f.write(ref_commit)
 
-  for segment in segments:
+  for car_brand, segment in segments:
     rlog_fn = get_segment(segment)
 
     if rlog_fn is None:
@@ -30,13 +30,16 @@ if __name__ == "__main__":
     lr = LogReader(rlog_fn)
 
     for cfg in CONFIGS:
-      log_msgs = replay_process(cfg, lr)
-      log_fn = os.path.join(process_replay_dir, "%s_%s_%s.bz2" % (segment, cfg.proc_name, ref_commit))
-      save_log(log_fn, log_msgs)
+        if car_brand == "BMW":
+          if cfg.proc_name not in ["radard"]:
+            log_msgs = replay_process(cfg, lr)
+            log_fn = os.path.join(process_replay_dir, "%s_%s_%s.bz2" % (segment, cfg.proc_name, ref_commit))
+            save_log(log_fn, log_msgs)
 
-      if not no_upload:
-        upload_file(log_fn, os.path.basename(log_fn))
-        os.remove(log_fn)
-    os.remove(rlog_fn)
+          if not no_upload:
+            upload_file(log_fn, os.path.basename(log_fn))
+            os.remove(log_fn)
+    if "--rlog" not in rlog_fn: #only if temp file
+      os.remove(rlog_fn)
 
   print("done")

@@ -61,6 +61,8 @@ def events_to_bytes(events):
   for e in events:
     if isinstance(e, capnp.lib.capnp._DynamicStructReader):
       e = e.as_builder()
+    if not e.is_root:
+      e = e.copy()
     ret.append(e.to_bytes())
   return ret
 
@@ -135,7 +137,7 @@ def state_transition(frame, CS, CP, state, events, soft_disable_timer, v_cruise_
   v_cruise_kph_last = v_cruise_kph
 
   # if stock cruise is completely disabled, then we can use our own set speed logic
-  if not CP.enableCruise:
+  if not CP.enableCruise or (CP.enableCruise and enabled):
     v_cruise_kph = update_v_cruise(v_cruise_kph, CS.buttonEvents, enabled)
   elif CP.enableCruise and CS.cruiseState.enabled:
     v_cruise_kph = CS.cruiseState.speed * CV.MS_TO_KPH
@@ -301,7 +303,7 @@ def data_send(sm, pm, CS, CI, CP, VM, state, events, actuators, v_cruise_kph, rk
 
   # Some override values for Honda
   brake_discount = (1.0 - clip(actuators.brake * 3., 0.0, 1.0))  # brake discount removes a sharp nonlinearity
-  CC.cruiseControl.speedOverride = float(max(0.0, (LoC.v_pid + CS.cruiseState.speedOffset) * brake_discount) if CP.enableCruise else 0.0)
+  CC.cruiseControl.speedOverride = sm['plan'].vTarget  #float(max(0.0, (LoC.v_pid + CS.cruiseState.speedOffset) * brake_discount) if CP.enableCruise else 0.0)
   CC.cruiseControl.accelOverride = CI.calc_accel_override(CS.aEgo, sm['plan'].aTarget, CS.vEgo, sm['plan'].vTarget)
 
   CC.hudControl.setSpeed = float(v_cruise_kph * CV.KPH_TO_MS)
@@ -345,8 +347,7 @@ def data_send(sm, pm, CS, CI, CP, VM, state, events, actuators, v_cruise_kph, rk
   force_decel = sm['dMonitoringState'].awarenessStatus < 0.
 
   # controlsState
-  dat = messaging.new_message()
-  dat.init('controlsState')
+  dat = messaging.new_message('controlsState')
   dat.valid = CS.canValid
   dat.controlsState = {
     "alertText1": AM.alert_text_1,
@@ -398,8 +399,7 @@ def data_send(sm, pm, CS, CI, CP, VM, state, events, actuators, v_cruise_kph, rk
   pm.send('controlsState', dat)
 
   # carState
-  cs_send = messaging.new_message()
-  cs_send.init('carState')
+  cs_send = messaging.new_message('carState')
   cs_send.valid = CS.canValid
   cs_send.carState = CS
   cs_send.carState.events = events
@@ -408,21 +408,18 @@ def data_send(sm, pm, CS, CI, CP, VM, state, events, actuators, v_cruise_kph, rk
   # carEvents - logged every second or on change
   events_bytes = events_to_bytes(events)
   if (sm.frame % int(1. / DT_CTRL) == 0) or (events_bytes != events_prev):
-    ce_send = messaging.new_message()
-    ce_send.init('carEvents', len(events))
+    ce_send = messaging.new_message('carEvents', len(events))
     ce_send.carEvents = events
     pm.send('carEvents', ce_send)
 
   # carParams - logged every 50 seconds (> 1 per segment)
   if (sm.frame % int(50. / DT_CTRL) == 0):
-    cp_send = messaging.new_message()
-    cp_send.init('carParams')
+    cp_send = messaging.new_message('carParams')
     cp_send.carParams = CP
     pm.send('carParams', cp_send)
 
   # carControl
-  cc_send = messaging.new_message()
-  cc_send.init('carControl')
+  cc_send = messaging.new_message('carControl')
   cc_send.valid = CS.canValid
   cc_send.carControl = CC
   pm.send('carControl', cc_send)
