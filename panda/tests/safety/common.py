@@ -13,12 +13,12 @@ def make_msg(bus, addr, length=8):
 
   return to_send
 
-def test_relay_malfunction(test, addr):
-  # input is a test class and the address that, if seen on bus 0, triggers
+def test_relay_malfunction(test, addr, bus=0):
+  # input is a test class and the address that, if seen on specified bus, triggers
   # the relay_malfunction protection logic: both tx_hook and fwd_hook are
   # expected to return failure
   test.assertFalse(test.safety.get_relay_malfunction())
-  test.safety.safety_rx_hook(make_msg(0, addr, 8))
+  test.safety.safety_rx_hook(make_msg(bus, addr, 8))
   test.assertTrue(test.safety.get_relay_malfunction())
   for a in range(1, 0x800):
     for b in range(0, 3):
@@ -35,4 +35,4 @@ def test_spam_can_buses(test, TX_MSGS):
   for addr in range(1, 0x800):
     for bus in range(0, 4):
       if all(addr != m[0] or bus != m[1] for m in TX_MSGS):
-        test.assertFalse(test.safety.safety_tx_hook(make_msg(bus, addr, 8)))
+        test.assertFalse(test.safety.safety_tx_hook(make_msg(bus, addr, 8)), "Bus:%d Msg:%#.1x" % (bus, addr))
