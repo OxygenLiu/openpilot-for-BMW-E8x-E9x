@@ -113,6 +113,7 @@ class CarInterface(CarInterfaceBase):
     ret.lateralTuning.pid.kiV = [0.0 / CarControllerParams.STEER_MAX, 0.05 / CarControllerParams.STEER_MAX]
     ret.lateralTuning.pid.kf =   1.0 / CarControllerParams.STEER_MAX # scales output from get_steer_feedforward_function
 
+    ret.longitudinalActuatorDelay = 0.8 # s, DCC delay
     ret.longitudinalTuning.kpBP = [0.]
     ret.longitudinalTuning.kpV = [.1]
     ret.longitudinalTuning.kiBP = [0.]

@@ -20,7 +20,7 @@ DECEL_MIN = -6  # cruise control hold down
 ACCEL_SCALE = max(ACCEL_MAX, -DECEL_MIN)
 
 STOCK_CRUISE_STALK_TICK = 0.2 # sample rate of stock cruise stalk messages when not pressed
-STOCK_CRUISE_STALK_HOLD_TICK = 0.05 # sample rate of stock cruise stalk messages when pressed
+STOCK_CRUISE_STALK_HOLD_TICK = 0.06 # sample rate of stock cruise stalk messages when pressed
 
 
 class CarController(CarControllerBase):
@@ -79,7 +79,7 @@ class CarController(CarControllerBase):
     # *** stalk press rate ***
     if (actuators.accel < -0.2 or actuators.accel > 0.2) and abs(speed_diff_req) > CC_STEP:
       # actuators.accel values ^^ inspired by C0F_VERZOEG_POS_FEIN, C0F_VERZOEG_NEG_FEIN from NCSDummy
-      cruise_tick = 0.1   # emulate held stalk (keep sending messages at 100Hz) to make bmw brake or accelerate hard
+      cruise_tick = STOCK_CRUISE_STALK_HOLD_TICK   # emulate held stalk (keep sending messages at 100Hz) to make bmw brake or accelerate hard
     else:
       cruise_tick = STOCK_CRUISE_STALK_TICK # default rate when not holding stalk
 
@@ -161,7 +161,7 @@ class CarController(CarControllerBase):
     new_actuators.steerOutputCan = self.apply_steer_last
 
     new_actuators.speed = self.calcDesiredSpeed
-    new_actuators.accel = speed_diff_req
+    new_actuators.accel = speed_diff_req / self.CC_units
 
     self.frame += 1
     return new_actuators, can_sends
