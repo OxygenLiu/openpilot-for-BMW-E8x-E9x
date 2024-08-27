@@ -110,6 +110,10 @@ class CarInterface(CarInterfaceBase):
     ret.lateralTuning.torque.kp = 0.2 / CarControllerParams.STEER_MAX
     ret.lateralTuning.torque.ki = 0.05 / CarControllerParams.STEER_MAX
     ret.lateralTuning.torque.kf = 1.0 / CarControllerParams.STEER_MAX
+    ret.lateralTuning.torque.friction = 2.2 #params['FRICTION']
+    ret.lateralTuning.torque.latAccelFactor = 1.72 #params['LAT_ACCEL_FACTOR']
+    ret.lateralTuning.torque.latAccelOffset = 0.0
+    ret.lateralTuning.torque.steeringAngleDeadzoneDeg = 0.0
 
     ret.longitudinalActuatorDelay = 1.0 # s, DCC delay
     ret.longitudinalTuning.kpBP = [0.]
