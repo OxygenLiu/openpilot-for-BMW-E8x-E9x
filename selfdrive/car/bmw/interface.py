@@ -106,13 +106,16 @@ class CarInterface(CarInterfaceBase):
     ret.steerControlType = car.CarParams.SteerControlType.torque
     ret.steerActuatorDelay = 0.15
     ret.steerLimitTimer = 0.4
-    ret.lateralTuning.init('pid')
-    ret.lateralTuning.pid.kpBP = [5.5, 30.]
-    ret.lateralTuning.pid.kiBP = [5.5, 30.]
-    ret.lateralTuning.pid.kpV = [0.2 / CarControllerParams.STEER_MAX, 0.8 / CarControllerParams.STEER_MAX]
-    ret.lateralTuning.pid.kiV = [0.0 / CarControllerParams.STEER_MAX, 0.05 / CarControllerParams.STEER_MAX]
-    ret.lateralTuning.pid.kf =   1.0 / CarControllerParams.STEER_MAX # scales output from get_steer_feedforward_function
+    ret.lateralTuning.init('torque')
+    ret.lateralTuning.torque.kp = 0.2 / CarControllerParams.STEER_MAX
+    ret.lateralTuning.torque.ki = 0.05 / CarControllerParams.STEER_MAX
+    ret.lateralTuning.torque.kf = 1.0 / CarControllerParams.STEER_MAX
+    ret.lateralTuning.torque.friction = 0.2 #params['FRICTION']
+    ret.lateralTuning.torque.latAccelFactor = 1.3 #params['LAT_ACCEL_FACTOR']
+    ret.lateralTuning.torque.latAccelOffset = 0.0
+    ret.lateralTuning.torque.steeringAngleDeadzoneDeg = 0.0
 
+    ret.longitudinalActuatorDelay = 0.8 # s, DCC delay
     ret.longitudinalTuning.kpBP = [0.]
     ret.longitudinalTuning.kpV = [.1]
     ret.longitudinalTuning.kiBP = [0.]
