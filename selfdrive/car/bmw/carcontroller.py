@@ -20,7 +20,7 @@ CRUISE_STALK_HOLD_TICK = 0.01 # emulate held stalk, 100Hz makes stock messages b
 CRUISE_SPEED_HYST_GAP = CC_STEP * 0.6  # between >0.5 and <1 to avoid cruise speed toggling. More than 0.5 to add some phase lead
 ACCEL_HYST_GAP = 0.05 # m/s^2
 
-ACCEL_HOLD_MEDIUM = 0.4
+ACCEL_HOLD_MEDIUM = 0.3
 DECEL_HOLD_MEDIUM = -0.5
 ACCEL_HOLD_STRONG = 1.0
 DECEL_HOLD_STRONG = -1.0
@@ -146,7 +146,7 @@ class CarController(CarControllerBase):
           cruise_cmd(CruiseStalk.minus5, hold=True) # produces down to -1.4 m/s2
         elif (self.accel_with_hyst > ACCEL_HOLD_MEDIUM or speed_err_act > 1) and not speed_err_req < -5*CC_STEP:
           cruise_cmd(CruiseStalk.plus1, hold=True) # produces up to 0.8 m/s2
-        elif ((self.accel_with_hyst < DECEL_HOLD_MEDIUM or speed_err_act < -1) and not speed_err_req > 5*CC_STEP) and not CS.out.gasPressed:
+        elif ((self.accel_with_hyst < DECEL_HOLD_MEDIUM or speed_err_act < -1) and not speed_err_req > 3*CC_STEP) and not CS.out.gasPressed:
           cruise_cmd(CruiseStalk.minus1, hold=True) # produces down to -0.8 m/s2
         elif speed_err_req > CC_STEP/2: # and (self.accel_with_hyst > 0.0 or CS.out.gasPressed):
           cruise_cmd(CruiseStalk.plus1)
